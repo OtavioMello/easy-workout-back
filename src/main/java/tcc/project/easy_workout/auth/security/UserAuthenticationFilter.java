@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,8 @@ import tcc.project.easy_workout.user.repository.TraineeRepository;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -52,11 +55,11 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             User user = null;
 
             if(role.equals("personal_trainer")){
-                user = personalTrainerRepository.findById(userId).orElseThrow(() -> new RuntimeException("Not Found"));
+                user = personalTrainerRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
             }
 
             if (role.equals("trainee")){
-                user = traineeRepository.findById(userId).orElseThrow(() -> new RuntimeException("Not Found"));
+                user = traineeRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
             }
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
@@ -67,7 +70,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     private void validateRequestUserId(HttpServletRequest request, String userId) {
         if(!request.getRequestURI().contains(userId)){
-            throw new ForbiddenException("Authenticated user hasn't access to this resource");
+            throw new NotAuthorizedException("Authenticated user hasn't access to this resource");
         }
     }
 
