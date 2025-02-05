@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -83,6 +85,17 @@ public class HandlerController {
                 .details(request.getRequestURI())
                 .timestamp(Instant.now());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(customExceptionMessage.build());
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler({AuthenticationException.class})
+    public ResponseEntity<CustomExceptionResponse> authenticationExceptionHandler(AuthenticationException exception, HttpServletRequest request) {
+        var customExceptionMessage = CustomExceptionResponse.builder()
+                .message(exception.getMessage())
+                .details(request.getRequestURI())
+                .timestamp(Instant.now());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(customExceptionMessage.build());
     }
 
     private CustomExceptionResponse getCustomExceptionMessage(WebApplicationException exception, HttpServletRequest request) {
