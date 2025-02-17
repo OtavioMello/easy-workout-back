@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import tcc.project.easy_workout.user.model.entity.enums.RoleName;
 import tcc.project.easy_workout.workout.model.WorkoutRoutine;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity(name = "tb_trainee")
@@ -25,7 +26,7 @@ public class Trainee extends User {
     private Float height;
 
     @Column(name = "birth_date")
-    private Date birthDate;
+    private LocalDate birthDate;
 
     @Column(name = "gender")
     private String gender;

@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                                 .requestMatchers(toH2Console()).permitAll()
                                 .requestMatchers("/trainee/**").hasRole("TRAINEE")
                                 .requestMatchers("/personal-trainer/**").hasRole("PERSONAL_TRAINER")
+                                .requestMatchers("/register/**").permitAll()
                                 .anyRequest().authenticated()
                                 .and()
                                 .addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class))
