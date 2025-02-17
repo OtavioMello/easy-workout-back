@@ -8,6 +8,7 @@ import lombok.*;
 import tcc.project.easy_workout.user.model.entity.PersonalTrainer;
 import tcc.project.easy_workout.workout.model.WorkoutRoutine;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -42,16 +43,16 @@ public class TraineeDto {
     @JsonProperty("height")
     private Float height;
 
-    @JsonProperty("birth_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date birthDate;
+    @JsonProperty("birthdate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate birthDate;
 
     @JsonProperty("gender")
     private String gender;
 
-    @JsonProperty("workout_workout_routines")
+    @JsonProperty("workout_routines")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<WorkoutRoutine> workoutWorkoutRoutines;
+    private List<WorkoutRoutine> workoutRoutines;
 
     @JsonProperty("personal_trainer")
     @JsonInclude(JsonInclude.Include.NON_NULL)

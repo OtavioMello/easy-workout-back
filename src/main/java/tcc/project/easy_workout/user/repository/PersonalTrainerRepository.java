@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface PersonalTrainerRepository extends JpaRepository<PersonalTrainer, String> {
 
     Optional<PersonalTrainer> findByEmail(String email);
+    Optional<PersonalTrainer> findByNickname(String nickname);
 }

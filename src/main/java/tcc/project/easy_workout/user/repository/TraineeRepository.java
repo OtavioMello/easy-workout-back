@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface TraineeRepository extends JpaRepository<Trainee, String> {
 
     Optional<Trainee> findByEmail(String email);
+    Optional<Trainee> findByNickname(String nickname);
 }

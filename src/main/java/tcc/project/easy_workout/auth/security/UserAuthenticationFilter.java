@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +30,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
     private final PersonalTrainerRepository personalTrainerRepository;
     private final TraineeRepository traineeRepository;
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(UserAuthenticationFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserAuthenticationFilter.class);
 
 
     @Override
