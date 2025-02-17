@@ -31,7 +31,7 @@ public class Trainee extends User {
     private String gender;
 
     @OneToMany(mappedBy = "trainee", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    List<WorkoutRoutine> workoutWorkoutRoutines;
+    List<WorkoutRoutine> workoutRoutines;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "personal_trainer_id")

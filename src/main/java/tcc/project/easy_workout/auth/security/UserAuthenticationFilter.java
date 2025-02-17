@@ -1,14 +1,14 @@
 package tcc.project.easy_workout.auth.security;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.slf4j.Logger;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -17,8 +17,6 @@ import tcc.project.easy_workout.user.model.entity.User;
 import tcc.project.easy_workout.user.repository.PersonalTrainerRepository;
 import tcc.project.easy_workout.user.repository.TraineeRepository;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +40,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             var token = recoverToken(request);
 
             if(Boolean.FALSE.equals(jsonWebTokenService.isValidToken(token))){
-                throw new TokenExpiredException("Expired token", JWT.decode(token).getExpiresAt().toInstant());
+                throw new CredentialsExpiredException(new StringFormattedMessage("Expired token {0}", JWT.decode(token).getExpiresAt().toInstant()).toString());
             }
 
             var userId = jsonWebTokenService.getUserId(token);
@@ -52,11 +50,11 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             User user = null;
 
             if(role.equals("personal_trainer")){
-                user = personalTrainerRepository.findById(userId).orElseThrow(() -> new RuntimeException("Not Found"));
+                user = personalTrainerRepository.findById(userId).orElseThrow(() -> new AuthenticationCredentialsNotFoundException("User not found"));
             }
 
             if (role.equals("trainee")){
-                user = traineeRepository.findById(userId).orElseThrow(() -> new RuntimeException("Not Found"));
+                user = traineeRepository.findById(userId).orElseThrow(() -> new AuthenticationCredentialsNotFoundException("User not found"));
             }
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
@@ -67,7 +65,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     private void validateRequestUserId(HttpServletRequest request, String userId) {
         if(!request.getRequestURI().contains(userId)){
-            throw new ForbiddenException("Authenticated user hasn't access to this resource");
+            throw new InsufficientAuthenticationException("Authenticated user hasn't access to this resource");
         }
     }
 
@@ -86,6 +84,6 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         if(Objects.nonNull(authorizationHeader)) {
             return authorizationHeader.replace("Bearer ", "");
         }
-        throw new BadRequestException("Authorization token not found");
+        throw new BadCredentialsException("Authorization token not found");
     }
 }
