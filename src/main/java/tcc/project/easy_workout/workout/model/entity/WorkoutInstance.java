@@ -1,4 +1,4 @@
-package tcc.project.easy_workout.workout.model;
+package tcc.project.easy_workout.workout.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,15 +25,11 @@ public class Workout {
     private String description;
 
     @OneToMany(mappedBy = "workout", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Sets> sets;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "equipments_id", referencedColumnName = "id")
-    private Equipments equipments;
+    private List<Set> sets;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workout_routine_id")
-    private WorkoutRoutine workoutRoutine;
+    @JoinColumn(name = "equipment_id", referencedColumnName = "id")
+    private Equipment equipment;
 
     @Column(name = "completed")
     private Boolean completed;
