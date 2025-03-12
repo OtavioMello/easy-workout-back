@@ -7,6 +7,6 @@ import java.net.URI;
 public interface PersonalTrainerService {
 
     URI createPersonalTrainer(PersonalTrainerDto request);
-    PersonalTrainerDto getPersonalTrainerById(String id);
-    PersonalTrainerDto updatePersonalTrainer(String id, PersonalTrainerDto request);
+    PersonalTrainerDto getPersonalTrainerById(String id, String authorization);
+    PersonalTrainerDto updatePersonalTrainer(String id, String authorization, PersonalTrainerDto request);
 }

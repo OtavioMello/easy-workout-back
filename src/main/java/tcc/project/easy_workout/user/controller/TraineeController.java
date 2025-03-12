@@ -11,7 +11,7 @@ import tcc.project.easy_workout.user.service.TraineeService;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/trainee")
+@RequestMapping("/trainees")
 @RequiredArgsConstructor
 public class TraineeController {
 
@@ -27,13 +27,13 @@ public class TraineeController {
     @GetMapping("/{id}")
     public ResponseEntity<TraineeDto> getTraineeById(@PathVariable String id, @RequestHeader("Authorization") String authorization) {
         LOGGER.info("[TraineeController] Calling getTraineeById: id={}", id);
-        return ResponseEntity.ok(traineeService.getTraineeById(id));
+        return ResponseEntity.ok(traineeService.getTraineeById(id, authorization));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TraineeDto> updateTrainee(@PathVariable String id, @RequestHeader("Authorization") String authorization, @RequestBody TraineeDto request) {
         LOGGER.info("[TraineeController] Calling updateTrainee: id={}", id);
-        return ResponseEntity.ok(traineeService.updateTrainee(id, request));
+        return ResponseEntity.ok(traineeService.updateTrainee(id, authorization, request));
     }
 
 }

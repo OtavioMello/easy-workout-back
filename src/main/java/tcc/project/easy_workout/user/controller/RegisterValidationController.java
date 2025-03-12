@@ -9,7 +9,7 @@ import tcc.project.easy_workout.user.model.dto.RegisterValidationDto;
 import tcc.project.easy_workout.user.service.RegisterValidationService;
 
 @RestController
-@RequestMapping("/register")
+@RequestMapping("/registers")
 @RequiredArgsConstructor
 public class RegisterValidationController {
 

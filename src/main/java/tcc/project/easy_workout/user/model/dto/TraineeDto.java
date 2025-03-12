@@ -3,13 +3,11 @@ package tcc.project.easy_workout.user.model.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import lombok.*;
 import tcc.project.easy_workout.user.model.entity.PersonalTrainer;
-import tcc.project.easy_workout.workout.model.WorkoutRoutine;
+import tcc.project.easy_workout.workout.model.dto.response.WorkoutRoutineSchemaResponseDto;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -52,7 +50,7 @@ public class TraineeDto {
 
     @JsonProperty("workout_routines")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<WorkoutRoutine> workoutRoutines;
+    private List<WorkoutRoutineSchemaResponseDto> workoutRoutines;
 
     @JsonProperty("personal_trainer")
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tcc.project.easy_workout.auth.utils.AuthValidation;
 import tcc.project.easy_workout.user.model.dto.TraineeDto;
 import tcc.project.easy_workout.user.model.entity.Role;
 import tcc.project.easy_workout.user.model.entity.Trainee;
@@ -36,16 +37,17 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
-    public TraineeDto getTraineeById(String id) {
+    public TraineeDto getTraineeById(String id, String authorization) {
+        AuthValidation.validateResourceAccessByAuthorizationUserId(id, authorization);
         var trainee = findTraineeById(id);
         LOGGER.info("[TraineeService] Trainee successfully found: id={}", id);
         return modelMapper.map(trainee, TraineeDto.class);
     }
 
     @Override
-    public TraineeDto updateTrainee(String id, TraineeDto request) {
+    public TraineeDto updateTrainee(String id, String authorization, TraineeDto request) {
+        AuthValidation.validateResourceAccessByAuthorizationUserId(id, authorization);
         var trainee = findTraineeById(id);
-
         modelMapper.map(request, trainee);
         traineeRepository.save(trainee);
         LOGGER.info("[TraineeService] Successfully updated trainee: id={}", id);
@@ -53,7 +55,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     private Trainee findTraineeById(String id) {
-        LOGGER.info("[TraineeService] Searching for resource in database: id={}", id);
-        return traineeRepository.findById(id).orElseThrow(() -> new NotFoundException("Requested resource is not found"));
+        LOGGER.info("[TraineeService] Searching for resource in the database: id={}", id);
+        return traineeRepository.findById(id).orElseThrow(() -> new NotFoundException("Requested resource not found"));
     }
 }

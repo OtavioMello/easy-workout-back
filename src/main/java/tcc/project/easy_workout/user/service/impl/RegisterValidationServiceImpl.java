@@ -20,9 +20,9 @@ public class RegisterValidationServiceImpl implements RegisterValidationService 
     @Override
     public RegisterValidationDto validateEmail(String email) {
 
-        LOGGER.info("[RegisterValidationService] validateEmail - Searching for trainee");
+        LOGGER.info("[RegisterValidationService] validateEmail - Searching for trainee in the database");
         var trainee = traineeRepository.findByEmail(email);
-        LOGGER.info("[RegisterValidationService] validateEmail - Searching for personal trainer");
+        LOGGER.info("[RegisterValidationService] validateEmail - Searching for personal trainer in the database");
         var personalTrainer = personalTrainerRepository.findByEmail(email);
 
         var alreadyExists = trainee.isPresent() || personalTrainer.isPresent();
@@ -33,9 +33,9 @@ public class RegisterValidationServiceImpl implements RegisterValidationService 
     @Override
     public RegisterValidationDto validateNickname(String nickname) {
 
-        LOGGER.info("[RegisterValidationService] validateNickname - Searching for trainee");
+        LOGGER.info("[RegisterValidationService] validateNickname - Searching for trainee in the database");
         var trainee = traineeRepository.findByNickname(nickname);
-        LOGGER.info("[RegisterValidationService] validateNickname - Searching for personal trainer");
+        LOGGER.info("[RegisterValidationService] validateNickname - Searching for personal trainer in the database");
         var personalTrainer = personalTrainerRepository.findByNickname(nickname);
 
         var alreadyExists = trainee.isPresent() || personalTrainer.isPresent();

@@ -1,4 +1,4 @@
-package tcc.project.easy_workout.workout.model;
+package tcc.project.easy_workout.workout.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Sets {
+public class Set {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,5 +23,5 @@ public class Sets {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_id")
-    private Workout workout;
+    private WorkoutInstance workoutInstance;
 }
