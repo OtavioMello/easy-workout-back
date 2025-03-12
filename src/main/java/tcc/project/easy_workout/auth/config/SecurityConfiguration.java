@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import tcc.project.easy_workout.auth.security.UserAuthenticationFilter;
+import tcc.project.easy_workout.common.exception.handler.HandlerController;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 public class SecurityConfiguration {
 
     private final UserAuthenticationFilter userAuthenticationFilter;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final HandlerController handlerController;
 
     @Bean
      public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -37,18 +37,20 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers(HttpMethod.POST, "/personal-trainer", "/trainee", "/auth").permitAll()
+                        req.requestMatchers(HttpMethod.POST, "/personal-trainers", "/trainees", "/auth").permitAll()
+                                .requestMatchers("/workouts/**").permitAll()
                                 .requestMatchers(toH2Console()).permitAll()
-                                .requestMatchers("/trainee/**").hasRole("TRAINEE")
-                                .requestMatchers("/personal-trainer/**").hasRole("PERSONAL_TRAINER")
+                                .requestMatchers("/trainees/**").hasRole("TRAINEE")
+                                .requestMatchers("/personal-trainers/**").hasRole("PERSONAL_TRAINER")
                                 .requestMatchers("/register/**").permitAll()
                                 .anyRequest().authenticated()
                                 .and()
                                 .addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class))
                 .headers(headers ->
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-                .exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint);
-
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(handlerController::accessDeniedHandler)
+                        .authenticationEntryPoint(handlerController::authenticationHandler));
         return http.build();
     }
 

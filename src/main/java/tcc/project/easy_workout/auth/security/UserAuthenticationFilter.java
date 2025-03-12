@@ -6,10 +6,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import tcc.project.easy_workout.user.repository.PersonalTrainerRepository;
 import tcc.project.easy_workout.user.repository.TraineeRepository;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,11 +44,10 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             var token = recoverToken(request);
 
             if(Boolean.FALSE.equals(jsonWebTokenService.isValidToken(token))){
-                throw new CredentialsExpiredException(new StringFormattedMessage("Expired token {0}", JWT.decode(token).getExpiresAt().toInstant()).toString());
+                throw new CredentialsExpiredException(MessageFormat.format("Token expired in {0}", JWT.decode(token).getExpiresAt().toInstant()));
             }
 
-            var userId = jsonWebTokenService.getUserId(token);
-            validateRequestUserId(request, userId);
+            var userId = JsonWebTokenService.getUserId(token);
             var role = getRoleFromToken(token);
 
             User user = null;
@@ -64,20 +66,26 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void validateRequestUserId(HttpServletRequest request, String userId) {
-        if(!request.getRequestURI().contains(userId)){
-            throw new InsufficientAuthenticationException("Authenticated user hasn't access to this resource");
-        }
-    }
-
     private String getRoleFromToken(String token) {
         return JWT.decode(token).getClaim("role").asString();
     }
 
     private boolean isPrivateRoute(HttpServletRequest request) {
-        var routes = List.of( "/trainee", "/personal-trainer");
-        var path = request.getRequestURI();
-        return routes.stream().anyMatch(path::contains) && !request.getMethod().equals("POST");
+
+        var postRoutes = List.of( "/trainees", "/personal-trainers", "/auth", "/h2-console");
+        var getRoutes = List.of("/h2-console", "/workouts");
+
+        var path = request.getServletPath();
+
+        if("POST".equals(request.getMethod())){
+            return postRoutes.stream().noneMatch(path::startsWith);
+        }
+
+        if ("GET".equals(request.getMethod())){
+            return getRoutes.stream().noneMatch(path::startsWith);
+        }
+
+        return true;
     }
 
     private String recoverToken(HttpServletRequest request) {

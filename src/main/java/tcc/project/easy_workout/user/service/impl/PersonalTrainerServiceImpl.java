@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tcc.project.easy_workout.auth.utils.AuthValidation;
 import tcc.project.easy_workout.user.model.dto.PersonalTrainerDto;
 import tcc.project.easy_workout.user.model.entity.PersonalTrainer;
 import tcc.project.easy_workout.user.model.entity.Role;
@@ -36,14 +37,16 @@ public class PersonalTrainerServiceImpl implements PersonalTrainerService {
     }
 
     @Override
-    public PersonalTrainerDto getPersonalTrainerById(String id) {
+    public PersonalTrainerDto getPersonalTrainerById(String id, String authorization) {
+        AuthValidation.validateResourceAccessByAuthorizationUserId(id, authorization);
         var personalTrainer = findPersonalTrainerById(id);
         LOGGER.info("[PersonalTrainerService] Personal trainer successfully found: id={}", id);
         return modelMapper.map(personalTrainer, PersonalTrainerDto.class);
     }
 
     @Override
-    public PersonalTrainerDto updatePersonalTrainer(String id, PersonalTrainerDto request) {
+    public PersonalTrainerDto updatePersonalTrainer(String id, String authorization, PersonalTrainerDto request) {
+        AuthValidation.validateResourceAccessByAuthorizationUserId(id, authorization);
         var personalTrainer = findPersonalTrainerById(id);
         modelMapper.map(request, personalTrainer);
         personalTrainerRepository.save(personalTrainer);
@@ -52,7 +55,7 @@ public class PersonalTrainerServiceImpl implements PersonalTrainerService {
     }
 
     private PersonalTrainer findPersonalTrainerById(String id) {
-        LOGGER.info("[PersonalTrainerService] Searching for resource in database: id={}", id);
-        return personalTrainerRepository.findById(id).orElseThrow(() -> new NotFoundException("Requested resource is not found"));
+        LOGGER.info("[PersonalTrainerService] Searching for resource in the database: id={}", id);
+        return personalTrainerRepository.findById(id).orElseThrow(() -> new NotFoundException("Requested resource not found"));
     }
 }

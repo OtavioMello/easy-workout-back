@@ -1,12 +1,13 @@
 package tcc.project.easy_workout.user.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
-import tcc.project.easy_workout.user.model.entity.enums.RoleName;
-import tcc.project.easy_workout.workout.model.WorkoutRoutine;
+import tcc.project.easy_workout.workout.model.entity.WorkoutRoutineInstance;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -32,7 +33,7 @@ public class Trainee extends User {
     private String gender;
 
     @OneToMany(mappedBy = "trainee", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    List<WorkoutRoutine> workoutRoutines;
+    List<WorkoutRoutineInstance> workoutRoutineInstances = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "personal_trainer_id")

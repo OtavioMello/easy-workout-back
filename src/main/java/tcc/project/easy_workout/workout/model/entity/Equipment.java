@@ -1,4 +1,4 @@
-package tcc.project.easy_workout.workout.model;
+package tcc.project.easy_workout.workout.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Equipments {
+public class Equipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -17,9 +17,5 @@ public class Equipments {
 
     @Column(name = "name")
     private String name;
-
-    @OneToOne(mappedBy = "equipments")
-    private Workout workout;
-
 
 }

@@ -35,12 +35,6 @@ public class JsonWebTokenServiceImpl implements JsonWebTokenService{
                 .withSubject(user.getId())
                 .withClaim("role", userRole)
                 .sign(algorithm);
-
-    }
-
-    @Override
-    public String getUserId(String token) {
-        return JWT.decode(token).getSubject();
     }
 
     @Override
