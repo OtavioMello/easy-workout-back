@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import tcc.project.easy_workout.user.model.entity.PersonalTrainer;
 import tcc.project.easy_workout.workout.model.dto.response.WorkoutRoutineSchemaResponseDto;
 
 import java.time.LocalDate;
@@ -15,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TraineeDto {
+public class TraineeResponseDto {
 
     @JsonProperty(value = "id", access = JsonProperty.Access.READ_ONLY)
     private String id;
@@ -35,12 +34,6 @@ public class TraineeDto {
     @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @JsonProperty("weight")
-    private Float weight;
-
-    @JsonProperty("height")
-    private Float height;
-
     @JsonProperty("birthdate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
@@ -52,7 +45,11 @@ public class TraineeDto {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<WorkoutRoutineSchemaResponseDto> workoutRoutines;
 
+    @JsonProperty("physical_data")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<PhysicalDataResponseDto> physicalData;
+
     @JsonProperty("personal_trainer")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private PersonalTrainer personalTrainer;
+    private PersonalTrainerResponseDto personalTrainer;
 }

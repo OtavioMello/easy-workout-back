@@ -20,12 +20,6 @@ import java.util.*;
 @SuperBuilder
 public class Trainee extends User {
 
-    @Column(name = "weight")
-    private Float weight;
-
-    @Column(name = "height")
-    private Float height;
-
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
@@ -33,7 +27,10 @@ public class Trainee extends User {
     private String gender;
 
     @OneToMany(mappedBy = "trainee", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    List<WorkoutRoutineInstance> workoutRoutineInstances = new ArrayList<>();
+    private List<WorkoutRoutineInstance> workoutRoutineInstances = new ArrayList<>();
+
+    @OneToMany(mappedBy = "trainee", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PhysicalData> physicalData = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "personal_trainer_id")
