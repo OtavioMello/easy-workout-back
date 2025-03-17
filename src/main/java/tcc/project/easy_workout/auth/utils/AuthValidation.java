@@ -1,10 +1,9 @@
 package tcc.project.easy_workout.auth.utils;
 
+import jakarta.ws.rs.ForbiddenException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import tcc.project.easy_workout.auth.security.JsonWebTokenService;
-
-import javax.ws.rs.ForbiddenException;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthValidation {

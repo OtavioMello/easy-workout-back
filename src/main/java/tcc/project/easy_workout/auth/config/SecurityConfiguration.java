@@ -1,5 +1,6 @@
 package tcc.project.easy_workout.auth.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -17,7 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import tcc.project.easy_workout.auth.security.UserAuthenticationFilter;
-import tcc.project.easy_workout.common.exception.handler.HandlerController;
 
 import java.util.List;
 
@@ -28,30 +29,42 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    public static final String PERSONAL_TRAINER = "PERSONAL_TRAINER";
+    public static final String TRAINEE = "TRAINEE";
     private final UserAuthenticationFilter userAuthenticationFilter;
-    private final HandlerController handlerController;
+    private final ObjectMapper objectMapper;
 
     @Bean
      public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(HttpMethod.POST, "/personal-trainers", "/trainees", "/auth").permitAll()
-                                .requestMatchers("/workouts/**").permitAll()
-                                .requestMatchers(toH2Console()).permitAll()
-                                .requestMatchers("/trainees/**").hasRole("TRAINEE")
-                                .requestMatchers("/personal-trainers/**").hasRole("PERSONAL_TRAINER")
                                 .requestMatchers("/register/**").permitAll()
-                                .anyRequest().authenticated()
-                                .and()
-                                .addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class))
+                                .requestMatchers(toH2Console()).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/trainees").hasRole(PERSONAL_TRAINER)
+                                .requestMatchers(HttpMethod.POST, "/personal-trainers/{personalTrainerId}/trainee/{traineeId}").hasRole(PERSONAL_TRAINER)
+                                .requestMatchers("/trainees/**").hasRole(TRAINEE)
+                                .requestMatchers("/personal-trainers/**").hasRole(PERSONAL_TRAINER)
+                                .anyRequest().authenticated())
+                                .addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers ->
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .exceptionHandling(exception -> exception
-                        .accessDeniedHandler(handlerController::accessDeniedHandler)
-                        .authenticationEntryPoint(handlerController::authenticationHandler));
+                        .accessDeniedHandler(customAccessDeniedHandler())
+                        .authenticationEntryPoint(customAuthenticationEntryPoint()));
         return http.build();
+    }
+
+    @Bean
+    public CustomAccessDeniedHandler customAccessDeniedHandler(){
+        return new CustomAccessDeniedHandler(objectMapper);
+    }
+
+    @Bean
+    public CustomAuthenticationEntryPoint customAuthenticationEntryPoint(){
+        return new CustomAuthenticationEntryPoint(objectMapper);
     }
 
     @Bean
