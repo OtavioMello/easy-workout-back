@@ -8,7 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PersonalTrainerRequestDto {
+public class PersonalTrainerResponseDto {
+
+    @JsonProperty(value = "id", access = JsonProperty.Access.READ_ONLY)
+    private String id;
 
     @JsonProperty("first_name")
     private String firstName;
@@ -22,6 +25,4 @@ public class PersonalTrainerRequestDto {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY)
-    private String password;
 }

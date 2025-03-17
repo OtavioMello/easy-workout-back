@@ -1,14 +1,15 @@
 package tcc.project.easy_workout.user.service;
 
-import tcc.project.easy_workout.user.model.dto.TraineeDto;
+import tcc.project.easy_workout.user.model.dto.TraineeRequestDto;
+import tcc.project.easy_workout.user.model.dto.TraineeResponseDto;
 
 import java.net.URI;
 
 public interface TraineeService {
 
-    URI createTrainee(TraineeDto request);
+    URI createTrainee(TraineeRequestDto request);
 
-    TraineeDto getTraineeById(String id, String authorization);
+    TraineeResponseDto getTraineeById(String id, String authorization);
 
-    TraineeDto updateTrainee(String id, String authorization, TraineeDto request);
+    TraineeResponseDto updateTrainee(String id, String authorization, TraineeRequestDto request);
 }

@@ -2,6 +2,9 @@ package tcc.project.easy_workout.workout.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -23,10 +26,6 @@ import tcc.project.easy_workout.workout.repository.WorkoutRoutineSchemaRepositor
 import tcc.project.easy_workout.workout.repository.WorkoutSchemaRepository;
 import tcc.project.easy_workout.workout.service.WorkoutService;
 
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
@@ -247,7 +246,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
         if(!isAllWorkoutInstancesCompleted){
             LOGGER.error("There are a conflict with uncompleted workouts: workoutRoutineInstanceId={}", workoutRoutineInstanceId);
-            throw new ConflictException("There are a conflict with uncompleted workouts", Response.Status.CONFLICT);
+            throw new ConflictException("There are a conflict with uncompleted workouts");
         }
 
         workoutRoutineInstance.setCompleted(Boolean.TRUE);
