@@ -1,3 +1,8 @@
+-- Inserir os roles
+INSERT INTO tb_roles(id, name) VALUES
+    ('1', 'ROLE_TRAINEE'),
+    ('2', 'ROLE_PERSONAL_TRAINER');
+
 -- Inserir os equipamentos
 INSERT INTO tb_equipments (id, name) VALUES
     ('1', 'HALTERES'),

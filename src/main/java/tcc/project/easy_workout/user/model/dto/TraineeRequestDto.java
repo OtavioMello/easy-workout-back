@@ -36,10 +36,10 @@ public class TraineeDto {
     private String password;
 
     @JsonProperty("weight")
-    private Float weight;
+    private Double weight;
 
     @JsonProperty("height")
-    private Float height;
+    private Double height;
 
     @JsonProperty("birthdate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
