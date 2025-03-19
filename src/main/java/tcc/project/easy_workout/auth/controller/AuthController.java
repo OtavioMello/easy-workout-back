@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tcc.project.easy_workout.auth.model.dto.AuthDto;
-import tcc.project.easy_workout.auth.model.dto.TokenDto;
+import tcc.project.easy_workout.auth.model.dto.AuthRequestDto;
+import tcc.project.easy_workout.auth.model.dto.AuthResponseDto;
 import tcc.project.easy_workout.auth.service.AuthService;
 
 @RestController
@@ -22,7 +22,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<TokenDto> authenticate(@RequestBody AuthDto request){
+    public ResponseEntity<AuthResponseDto> authenticate(@RequestBody AuthRequestDto request){
         LOGGER.info("[AuthController] Calling authenticate");
         return ResponseEntity.ok(authService.authenticate(request));
     }
