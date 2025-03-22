@@ -31,9 +31,6 @@ public class TraineeResponseDto {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY)
-    private String password;
-
     @JsonProperty("birthdate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
