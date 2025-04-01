@@ -41,7 +41,7 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(HttpMethod.POST, "/personal-trainers", "/trainees", "/auth").permitAll()
-                                .requestMatchers("/register/**").permitAll()
+                                .requestMatchers("/registers/**").permitAll()
                                 .requestMatchers(toH2Console()).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/trainees").hasRole(PERSONAL_TRAINER)
                                 .requestMatchers(HttpMethod.POST, "/personal-trainers/{personalTrainerId}/trainee/{traineeId}").hasRole(PERSONAL_TRAINER)

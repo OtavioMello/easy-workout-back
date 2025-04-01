@@ -8,8 +8,14 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TokenDto {
+public class AuthResponseDto {
 
     @JsonProperty("token")
     private String token;
+
+    @JsonProperty("user_id")
+    private String userId;
+
+    @JsonProperty("role")
+    private String role;
 }

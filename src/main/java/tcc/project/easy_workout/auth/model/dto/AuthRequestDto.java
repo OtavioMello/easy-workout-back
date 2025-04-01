@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthDto {
+public class AuthRequestDto {
 
     @JsonProperty("email")
     private String email;
