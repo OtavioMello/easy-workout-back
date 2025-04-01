@@ -3,6 +3,18 @@ INSERT INTO tb_roles(id, name) VALUES
     ('1', 'ROLE_TRAINEE'),
     ('2', 'ROLE_PERSONAL_TRAINER');
 
+-- Inserir Trainee
+INSERT INTO tb_trainee(id, first_name, last_name, nickname, email, password, birthdate, gender, personal_trainer_id) VALUES
+('1', 'John', 'Doe', 'trainee_jondoe', 'jondoe@email.com', '$2a$10$1SMsRksSGGetXr1uv0cynuSNsObcokBy7d7xG/IZspBWT6iD4XBMa', '2002-04-19', 'masculino', null);
+
+-- Inserir Physical Data
+INSERT INTO tb_physical_data(id, created_at, height, imc, weight, trainee_id) VALUES
+('1', '2025-03-22', 1.73, 21.55, 64.5, '1');
+
+-- Inserir Trainee Role
+INSERT INTO trainee_roles(user_id, role_id) VALUES
+('1', '1');
+
 -- Inserir os equipamentos
 INSERT INTO tb_equipments (id, name) VALUES
     ('1', 'HALTERES'),

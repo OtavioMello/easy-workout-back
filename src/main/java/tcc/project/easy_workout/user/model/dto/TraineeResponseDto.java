@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import tcc.project.easy_workout.workout.model.dto.response.WorkoutRoutineSchemaResponseDto;
+import tcc.project.easy_workout.workout.model.dto.response.WorkoutRoutineInstanceResponseDto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +40,7 @@ public class TraineeResponseDto {
 
     @JsonProperty("workout_routines")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<WorkoutRoutineSchemaResponseDto> workoutRoutines;
+    private List<WorkoutRoutineInstanceResponseDto> workoutRoutines;
 
     @JsonProperty("physical_data")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

@@ -20,7 +20,7 @@ import java.util.*;
 @SuperBuilder
 public class Trainee extends User {
 
-    @Column(name = "birth_date")
+    @Column(name = "birthdate")
     private LocalDate birthDate;
 
     @Column(name = "gender")
