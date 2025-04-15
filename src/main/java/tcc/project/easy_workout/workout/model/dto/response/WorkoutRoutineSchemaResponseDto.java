@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Getter
@@ -36,5 +37,9 @@ public class WorkoutRoutineSchemaResponseDto {
 
     @JsonProperty("is_priority")
     private Boolean isPriority = Boolean.FALSE;
+
+    @JsonProperty("tags")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private HashSet<String> tags;
 
 }

@@ -1,7 +1,6 @@
 package tcc.project.easy_workout.workout.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -29,6 +28,6 @@ public class WorkoutInstanceResponseDto {
     @JsonProperty("sets")
     private List<SetResponseDto> sets = new ArrayList<>();
 
-    @Column(name = "completed")
+    @JsonProperty("completed")
     private Boolean completed;
 }

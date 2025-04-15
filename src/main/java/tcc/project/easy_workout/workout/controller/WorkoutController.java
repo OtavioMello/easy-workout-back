@@ -6,11 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tcc.project.easy_workout.workout.model.dto.request.WorkoutInstanceUpdateRequestDto;
-import tcc.project.easy_workout.workout.model.dto.request.WorkoutRoutineInstanceRequestDto;
 import tcc.project.easy_workout.workout.model.dto.request.WorkoutRoutineSchemaRequestDto;
 import tcc.project.easy_workout.workout.model.dto.response.WorkoutRoutineInstanceResponseDto;
 import tcc.project.easy_workout.workout.model.dto.response.WorkoutRoutineSchemaResponseDto;
-import tcc.project.easy_workout.workout.model.dto.response.WorkoutSchemaResponseDto;
+import tcc.project.easy_workout.workout.model.dto.response.WorkoutTemplateResponseDto;
 import tcc.project.easy_workout.workout.service.WorkoutService;
 
 import java.util.List;
@@ -25,16 +24,16 @@ public class WorkoutController {
 
     /* WORKOUTS SCHEMAS */
 
-    @GetMapping("/schemas")
-    public ResponseEntity<List<WorkoutSchemaResponseDto>> getAllWorkoutsSchemas(@RequestHeader("Authorization") String authorization) {
-        LOGGER.info("[WorkoutController] Calling getAllWorkoutsSchemas");
-        return ResponseEntity.ok(workoutService.getAllWorkoutSchemas());
+    @GetMapping("/templates")
+    public ResponseEntity<List<WorkoutTemplateResponseDto>> getAllWorkoutTemplates(@RequestHeader("Authorization") String authorization) {
+        LOGGER.info("[WorkoutController] Calling getAllWorkoutTemplates");
+        return ResponseEntity.ok(workoutService.getAllWorkoutTemplates());
     }
 
-    @GetMapping("/schemas/{workoutSchemaId}")
-    public ResponseEntity<WorkoutSchemaResponseDto> getWorkoutSchemaById(@PathVariable String workoutSchemaId, @RequestHeader("Authorization") String authorization) {
-        LOGGER.info("[WorkoutController] Calling getWorkoutSchemaById: workoutSchemaId={}", workoutSchemaId);
-        return ResponseEntity.ok(workoutService.getWorkoutSchemaById(workoutSchemaId));
+    @GetMapping("/templates/{workoutTemplateId}")
+    public ResponseEntity<WorkoutTemplateResponseDto> getWorkoutSchemaById(@PathVariable String workoutTemplateId, @RequestHeader("Authorization") String authorization) {
+        LOGGER.info("[WorkoutController] Calling getWorkoutTemplateById: workoutTemplateId={}", workoutTemplateId);
+        return ResponseEntity.ok(workoutService.getWorkoutTemplateById(workoutTemplateId));
     }
 
     /* WORKOUTS INSTANCES */
@@ -65,6 +64,12 @@ public class WorkoutController {
         return ResponseEntity.ok(workoutService.getWorkoutRoutineSchemaById(workoutRoutineSchemaId, authorization));
     }
 
+    @GetMapping("/routines/schemas/{workoutRoutineSchemaId}/instance")
+    public ResponseEntity<WorkoutRoutineInstanceResponseDto> getWorkoutRoutineInstanceBySchemaId(@PathVariable String workoutRoutineSchemaId, @RequestHeader("Authorization") String authorization){
+        LOGGER.info("[WorkoutController] Calling getWorkoutRoutineInstanceBySchemaId: workoutRoutineSchemaId={}", workoutRoutineSchemaId);
+        return ResponseEntity.ok(workoutService.getWorkoutRoutineInstanceBySchemaId(workoutRoutineSchemaId, authorization));
+    }
+
     @PutMapping("/routines/schemas/{workoutRoutineSchemaId}")
     public ResponseEntity<WorkoutRoutineSchemaResponseDto> updateWorkoutRoutineSchemaById(@RequestBody WorkoutRoutineSchemaRequestDto request, @PathVariable String workoutRoutineSchemaId, @RequestHeader("Authorization") String authorization){
         LOGGER.info("[WorkoutController] Calling updateWorkoutRoutineById: workoutRoutineSchemaId={}", workoutRoutineSchemaId);
@@ -78,12 +83,6 @@ public class WorkoutController {
     }
 
     /* WORKOUT ROUTINES INSTANCES */
-
-    @PostMapping("/routines/instances/trainees/{traineeId}")
-    public ResponseEntity<Void> addWorkoutRoutineInstancesToTrainee(@RequestBody List<WorkoutRoutineInstanceRequestDto> request, @PathVariable String traineeId, @RequestHeader("Authorization") String authorization){
-        LOGGER.info("[WorkoutController] Calling addWorkoutRoutineInstancesToTrainee: traineeId={}", traineeId);
-        return ResponseEntity.ok(workoutService.addWorkoutRoutineInstancesToTrainee(request, traineeId, authorization));
-    }
 
     @GetMapping("/routines/instances/trainees/{traineeId}")
     public ResponseEntity<List<WorkoutRoutineInstanceResponseDto>> getAllTraineeWorkoutRoutineInstances(@PathVariable String traineeId, @RequestHeader("Authorization") String authorization){
