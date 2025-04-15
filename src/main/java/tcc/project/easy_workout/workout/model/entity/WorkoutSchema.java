@@ -3,6 +3,9 @@ package tcc.project.easy_workout.workout.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity(name = "tb_workout_schemas")
 @Getter
 @Setter
@@ -13,17 +16,12 @@ public class WorkoutSchema {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
     private String id;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "description")
-    private String description;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "equipment_id", referencedColumnName = "id")
-    private Equipment equipment;
+    @JoinColumn(name = "workout_template_id", referencedColumnName = "id")
+    private WorkoutTemplate template;
 
+    @OneToMany(mappedBy = "workoutSchema", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<SetSchema> sets = new ArrayList<>();
 }

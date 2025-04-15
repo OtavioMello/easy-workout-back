@@ -24,14 +24,14 @@ INSERT INTO tb_equipments (id, name) VALUES
     ('5', 'BARRA COM ANILHAS');
 
 -- Inserir os schemas de Workout (Workouts predefinidos)
-INSERT INTO tb_workout_schemas (id, name, description, equipment_id) VALUES
-    ('1', 'Flexão de Braço', 'Exercício básico para fortalecimento de peitoral, ombros e tríceps.', '4'),
-    ('2', 'Barra Fixa', 'Exercício para desenvolvimento de dorsais e bíceps utilizando uma barra fixa.', '2'),
-    ('3', 'Agachamento Livre', 'Exercício para fortalecimento de quadríceps, glúteos e lombar.', '5'),
-    ('4', 'Levantamento Terra', 'Movimento composto para fortalecer o corpo inteiro, com foco em pernas, costas e glúteos.', '5'),
-    ('5', 'Supino Reto', 'Exercício para desenvolvimento de peitoral, tríceps e ombros.', '1'), 
-    ('6', 'Desenvolvimento com Halteres', 'Exercício para ombros utilizando halteres.', '1'), 
-    ('7', 'Rosca Direta', 'Exercício isolado para fortalecimento do bíceps.', '1'), 
-    ('8', 'Extensão de Tríceps', 'Exercício para desenvolvimento do tríceps, geralmente com halteres ou barras.', '1'), 
-    ('9', 'Abdominal', 'Exercício básico para fortalecimento do abdômen.', '4'), 
-    ('10', 'Remada Curvada', 'Exercício para fortalecimento das costas, utilizando barra ou halteres.', '1'); 
+INSERT INTO tb_workout_templates (id, name, description, tag, equipment_id) VALUES
+    ('1', 'Flexão de Braço', 'Exercício básico para fortalecimento de peitoral, ombros e tríceps.', 'Peito', '4'),
+    ('2', 'Barra Fixa', 'Exercício para desenvolvimento de dorsais e bíceps utilizando uma barra fixa.', 'Costas', '2'),
+    ('3', 'Agachamento Livre', 'Exercício para fortalecimento de quadríceps, glúteos e lombar.', 'Perna', '5'),
+    ('4', 'Levantamento Terra', 'Movimento composto para fortalecer o corpo inteiro, com foco em pernas, costas e glúteos.', 'Perna', '5'),
+    ('5', 'Supino Reto', 'Exercício para desenvolvimento de peitoral, tríceps e ombros.', 'Peito', '1'),
+    ('6', 'Desenvolvimento com Halteres', 'Exercício para ombros utilizando halteres.', 'Ombro', '1'),
+    ('7', 'Rosca Direta', 'Exercício isolado para fortalecimento do bíceps.', 'Bíceps', '1'),
+    ('8', 'Extensão de Tríceps', 'Exercício para desenvolvimento do tríceps, geralmente com halteres ou barras.', 'Tríceps', '1'),
+    ('9', 'Abdominal', 'Exercício básico para fortalecimento do abdômen.', 'Abdomen', '4'),
+    ('10', 'Remada Curvada', 'Exercício para fortalecimento das costas, utilizando barra ou halteres.', 'Costas', '1');

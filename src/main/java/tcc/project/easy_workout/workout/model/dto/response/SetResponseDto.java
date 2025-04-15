@@ -1,5 +1,6 @@
 package tcc.project.easy_workout.workout.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class SetResponseDto {
     private Integer reps;
 
     @JsonProperty("weight")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double weight;
 
 }

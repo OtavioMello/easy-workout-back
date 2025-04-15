@@ -1,9 +1,7 @@
 package tcc.project.easy_workout.workout.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.ForbiddenException;
-import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -16,14 +14,16 @@ import tcc.project.easy_workout.auth.utils.AuthValidation;
 import tcc.project.easy_workout.common.exception.model.ConflictException;
 import tcc.project.easy_workout.user.model.entity.Trainee;
 import tcc.project.easy_workout.user.repository.TraineeRepository;
-import tcc.project.easy_workout.workout.model.dto.request.*;
+import tcc.project.easy_workout.workout.model.dto.request.SetUpdateRequestDto;
+import tcc.project.easy_workout.workout.model.dto.request.WorkoutInstanceUpdateRequestDto;
+import tcc.project.easy_workout.workout.model.dto.request.WorkoutRoutineSchemaRequestDto;
 import tcc.project.easy_workout.workout.model.dto.response.*;
 import tcc.project.easy_workout.workout.model.entity.Set;
 import tcc.project.easy_workout.workout.model.entity.*;
 import tcc.project.easy_workout.workout.repository.WorkoutInstanceRepository;
 import tcc.project.easy_workout.workout.repository.WorkoutRoutineInstanceRepository;
 import tcc.project.easy_workout.workout.repository.WorkoutRoutineSchemaRepository;
-import tcc.project.easy_workout.workout.repository.WorkoutSchemaRepository;
+import tcc.project.easy_workout.workout.repository.WorkoutTemplateRepository;
 import tcc.project.easy_workout.workout.service.WorkoutService;
 
 import java.time.LocalDate;
@@ -37,8 +37,8 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkoutServiceImpl.class);
     public static final String REQUESTED_RESOURCE_NOT_FOUND = "Requested resource not found";
-    private final WorkoutSchemaRepository workoutSchemaRepository;
     private final WorkoutInstanceRepository workoutInstanceRepository;
+    private final WorkoutTemplateRepository workoutTemplateRepository;
     private final TraineeRepository traineeRepository;
     private final WorkoutRoutineInstanceRepository workoutRoutineInstanceRepository;
     private final WorkoutRoutineSchemaRepository workoutRoutineSchemaRepository;
@@ -46,24 +46,22 @@ public class WorkoutServiceImpl implements WorkoutService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public WorkoutSchemaResponseDto getWorkoutSchemaById(String workoutSchemaId) {
-        LOGGER.info("[WorkoutService] Searching for resource in the database: workoutSchemaId={}", workoutSchemaId);
-        var workoutSchema = workoutSchemaRepository.findById(workoutSchemaId).orElseThrow(() -> new NotFoundException(REQUESTED_RESOURCE_NOT_FOUND));
-        LOGGER.info("[WorkoutService] Workout schema successfully found: id={}", workoutSchemaId);
-        return modelMapper.map(workoutSchema, WorkoutSchemaResponseDto.class);
+    public WorkoutTemplateResponseDto getWorkoutTemplateById(String workoutTemplateId) {
+        var workoutTemplate = findWorkoutTemplateById(workoutTemplateId);
+        LOGGER.info("[WorkoutService] Workout schema successfully found: id={}", workoutTemplateId);
+        return modelMapper.map(workoutTemplate, WorkoutTemplateResponseDto.class);
     }
 
     @Override
-    public List<WorkoutSchemaResponseDto> getAllWorkoutSchemas() {
+    public List<WorkoutTemplateResponseDto> getAllWorkoutTemplates() {
         LOGGER.info("[WorkoutService] Searching for resources in database");
-        var workoutSchemas = workoutSchemaRepository.findAll();
-        LOGGER.info("[WorkoutService] Found {} workout schemas in the database", workoutSchemas.size());
-        return workoutSchemas.stream().map(w -> modelMapper.map(w, WorkoutSchemaResponseDto.class)).toList();
+        var workoutTemplates = workoutTemplateRepository.findAll();
+        LOGGER.info("[WorkoutService] Found {} workout schemas in the database", workoutTemplates.size());
+        return workoutTemplates.stream().map(w -> modelMapper.map(w, WorkoutTemplateResponseDto.class)).toList();
     }
 
     @Override
     public Void updateWorkoutInstanceById(WorkoutInstanceUpdateRequestDto request, String workoutInstanceId, String authorization) {
-
         LOGGER.info("[WorkoutService] Searching for resource in the database: workoutInstanceId={}", workoutInstanceId);
         var workoutInstance = workoutInstanceRepository.findById(workoutInstanceId).orElseThrow(() -> new NotFoundException(REQUESTED_RESOURCE_NOT_FOUND));
 
@@ -86,20 +84,32 @@ public class WorkoutServiceImpl implements WorkoutService {
         }
 
         workoutInstanceRepository.save(workoutInstance);
-
+        LOGGER.info("[WorkoutService] Successfully updated workout instance: workoutInstanceId={}", workoutInstanceId);
         return null;
     }
 
     @Override
     public Void addWorkoutRoutineSchemasToTrainee(List<WorkoutRoutineSchemaRequestDto> request, String traineeId, String authorization) {
-
         var trainee = findTraineeById(traineeId);
         validateIfAuthenticatedUserCanPerformAction(authorization, trainee);
 
         List<WorkoutRoutineSchema> workoutRoutineSchemas = request.stream().map(workoutRoutineSchemaRequestDto -> {
 
-            LOGGER.info("[WorkoutService] Searching for resources in the database: workoutSchemaIds={}", objectToJsonParser(workoutRoutineSchemaRequestDto.getWorkoutSchemaIds()));
-            var workoutSchemas = workoutSchemaRepository.findByIdIn(workoutRoutineSchemaRequestDto.getWorkoutSchemaIds());
+            List<WorkoutSchema> workoutSchemas = new ArrayList<>();
+
+            workoutRoutineSchemaRequestDto.getWorkoutSchemas().forEach(workoutSchemaRequestDto -> {
+                var workoutTemplate = findWorkoutTemplateById(workoutSchemaRequestDto.getTemplateId());
+                var workoutSchema = WorkoutSchema.builder()
+                        .template(workoutTemplate)
+                        .sets(workoutSchemaRequestDto.getSets().stream()
+                                .map(setRequestDto ->
+                                        modelMapper.map(setRequestDto, SetSchema.class))
+                                .toList())
+                        .build();
+
+                workoutSchema.getSets().forEach(setSchema -> setSchema.setWorkoutSchema(workoutSchema));
+                workoutSchemas.add(workoutSchema);
+            });
 
             return WorkoutRoutineSchema.builder()
                     .name(workoutRoutineSchemaRequestDto.getName())
@@ -112,7 +122,6 @@ public class WorkoutServiceImpl implements WorkoutService {
         }).toList();
 
         workoutRoutineSchemaRepository.saveAll(workoutRoutineSchemas);
-
         LOGGER.info("[WorkoutService] Successfully added {} workout routine schemas to trainee: traineeId={}", workoutRoutineSchemas.size(), traineeId);
 
         return null;
@@ -124,7 +133,9 @@ public class WorkoutServiceImpl implements WorkoutService {
         LOGGER.info("[WorkoutService] Workout routine successfully found: workoutRoutineSchemaId={}", workoutRoutineSchemaId);
         var trainee = workoutRoutine.getTrainee();
         validateIfAuthenticatedUserCanPerformAction(authorization, trainee);
-        return modelMapper.map(workoutRoutine, WorkoutRoutineSchemaResponseDto.class);
+        var workoutRoutineSchemaResponse = modelMapper.map(workoutRoutine, WorkoutRoutineSchemaResponseDto.class);
+        setWorkoutRoutineExecutionPriority(workoutRoutineSchemaResponse, null);
+        return workoutRoutineSchemaResponse;
     }
 
     @Override
@@ -132,9 +143,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         AuthValidation.validateResourceAccessByAuthorizationUserId(traineeId, authorization);
         
         findTraineeById(traineeId);
-
-        var currentDate = LocalDate.now();
-        
+        LOGGER.info("[WorkoutService] Searching for resource in the database: traineeId={}", traineeId);
         var workoutRoutinesSchemas = workoutRoutineSchemaRepository.findAllByTraineeId(traineeId);
 
         var workoutRoutinesSchemasResponse = new ArrayList<>(workoutRoutinesSchemas.stream()
@@ -143,18 +152,46 @@ public class WorkoutServiceImpl implements WorkoutService {
 
         workoutRoutinesSchemasResponse.forEach(workoutRoutineSchemaResponseDto -> {
 
-            var workoutExecutionDays = workoutRoutineSchemaResponseDto.getDaysOfWeek().split(",");
+            workoutRoutineSchemaResponseDto.setTags(workoutRoutineSchemaResponseDto.getWorkoutSchemas().stream()
+                    .map(workoutSchemaResponseDto -> workoutSchemaResponseDto.getTemplate().getTag())
+                    .collect(Collectors.toCollection(HashSet::new)));
 
-            if (Arrays.stream(workoutExecutionDays).anyMatch(workoutExecutionDay ->
-                    workoutExecutionDay.equals(currentDate.getDayOfWeek().name()))){
+            setWorkoutRoutineExecutionPriority(workoutRoutineSchemaResponseDto, workoutRoutinesSchemasResponse);
 
-                Collections.swap(workoutRoutinesSchemasResponse, 0, workoutRoutinesSchemasResponse.indexOf(workoutRoutineSchemaResponseDto));
-                workoutRoutineSchemaResponseDto.setIsPriority(Boolean.TRUE);
-            }
         });
 
-        LOGGER.info("[WorkoutService] Found {} workout routines for trainee {} in the database", workoutRoutinesSchemasResponse.size(), traineeId);
+        LOGGER.info("[WorkoutService] Successfully found {} workout routines for trainee {} in the database", workoutRoutinesSchemasResponse.size(), traineeId);
         return workoutRoutinesSchemasResponse;
+    }
+
+    @Override
+    public WorkoutRoutineInstanceResponseDto getWorkoutRoutineInstanceBySchemaId(String workoutRoutineSchemaId, String authorization) {
+
+        LOGGER.info("[WorkoutService] Searching for workout routine instance in the database: workoutRoutineSchemaId={}", workoutRoutineSchemaId);
+        var optionalWorkoutRoutineInstance = workoutRoutineInstanceRepository.findBySchemaId(workoutRoutineSchemaId);
+
+        if (optionalWorkoutRoutineInstance.isPresent() && Boolean.FALSE.equals(optionalWorkoutRoutineInstance.get().getCompleted())){
+
+            var trainee = optionalWorkoutRoutineInstance.get().getTrainee();
+            validateIfAuthenticatedUserCanPerformAction(authorization, trainee);
+
+            var workoutRoutineInstance = optionalWorkoutRoutineInstance.get();
+
+            LOGGER.info("[WorkoutService] Successfully found an existing workout routine instance for workout routine schema in the database: workoutRoutineInstanceId={}", workoutRoutineInstance.getId());
+            return WorkoutRoutineInstanceResponseDto.builder().id(workoutRoutineInstance.getId()).build();
+        }
+
+        var formattedToken = authorization.replace("Bearer ", "");
+        var userId = JsonWebTokenService.getUserId(formattedToken);
+        var trainee = findTraineeById(userId);
+        validateIfAuthenticatedUserCanPerformAction(authorization, trainee);
+
+        var workoutRoutineInstance = createWorkoutRoutineInstance(workoutRoutineSchemaId);
+        workoutRoutineInstanceRepository.save(workoutRoutineInstance);
+
+        LOGGER.info("[WorkoutService] Successfully created a new workout routine instance: workoutRoutineInstanceId={}", workoutRoutineInstance.getId());
+        return WorkoutRoutineInstanceResponseDto.builder().id(workoutRoutineInstance.getId()).build();
+
     }
 
     @Override
@@ -181,54 +218,28 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public Void addWorkoutRoutineInstancesToTrainee(List<WorkoutRoutineInstanceRequestDto> request, String traineeId, String authorization) {
-
-        var trainee = findTraineeById(traineeId);
-        validateIfAuthenticatedUserCanPerformAction(authorization, trainee);
-
-        List<WorkoutRoutineInstance> workoutRoutineInstances = request.stream()
-                .map(workoutRoutineInstanceRequestDto -> createWorkoutRoutineInstance(workoutRoutineInstanceRequestDto, trainee)).toList();
-
-        workoutRoutineInstanceRepository.saveAll(workoutRoutineInstances);
-        LOGGER.info("[WorkoutService] Successfully added {} workout routine instances to trainee: traineeId={}", workoutRoutineInstances.size(), traineeId);
-        return null;
-    }
-
-    @Override
     public List<WorkoutRoutineInstanceResponseDto> getAllTraineeWorkoutRoutineInstances(String traineeId, String authorization) {
-
         var trainee = findTraineeById(traineeId);
         validateIfAuthenticatedUserCanPerformAction(authorization, trainee);
-
+        LOGGER.info("[WorkoutService] Searching for workout routine instance(s) in the database: traineeId={}", traineeId);
         var workoutRoutines = workoutRoutineInstanceRepository.findAllByTraineeId(traineeId);
 
-        return workoutRoutines.stream().map(workoutRoutineInstance -> {
-
-            var workoutRoutineSchema = workoutRoutineInstance.getSchema();
-            var workoutInstances = workoutRoutineInstance.getWorkoutInstances();
-
-            var workoutInstancesResponse = workoutInstances.stream()
-                    .map(this::toWorkoutInstanceResponseDto).toList();
-
-            return toWorkoutRoutineInstanceResponseDto(workoutRoutineInstance, workoutRoutineSchema, workoutInstancesResponse);
-
-        }).toList();
+        LOGGER.info("[WorkoutService] Successfully found {} workout routine instance(s) for trainee {} in the database", workoutRoutines.size(), traineeId);
+        return workoutRoutines.stream().map(this::toWorkoutRoutineInstanceResponseDto).toList();
     }
 
     @Override
     public WorkoutRoutineInstanceResponseDto getWorkoutRoutineInstanceById(String workoutRoutineInstanceId, String authorization) {
 
+        LOGGER.info("[WorkoutService] Searching for workout routine instance in the database: workoutRoutineInstanceId={}", workoutRoutineInstanceId);
         var workoutRoutineInstance = findWorkoutRoutineInstanceById(workoutRoutineInstanceId);
         var trainee = workoutRoutineInstance.getTrainee();
 
+
         validateIfAuthenticatedUserCanPerformAction(authorization, trainee);
 
-        var workoutRoutineSchema = workoutRoutineInstance.getSchema();
-        var workoutInstances = workoutRoutineInstance.getWorkoutInstances();
-
-        var workoutInstancesResponse = workoutInstances.stream().map(this::toWorkoutInstanceResponseDto).toList();
-
-        return toWorkoutRoutineInstanceResponseDto(workoutRoutineInstance, workoutRoutineSchema, workoutInstancesResponse);
+        LOGGER.info("[WorkoutService] Successfully found workout routine instance in the database: workoutRoutineInstanceId={}", workoutRoutineInstanceId);
+        return toWorkoutRoutineInstanceResponseDto(workoutRoutineInstance);
     }
 
     @Override
@@ -252,6 +263,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         workoutRoutineInstance.setCompleted(Boolean.TRUE);
         workoutRoutineInstanceRepository.save(workoutRoutineInstance);
 
+        LOGGER.info("[WorkoutService] Successfully updated workout routine instance: workoutRoutineInstanceId={}", workoutRoutineInstanceId);
         return null;
     }
 
@@ -270,6 +282,11 @@ public class WorkoutServiceImpl implements WorkoutService {
         return workoutRoutineInstanceRepository.findById(workoutRoutineInstanceId).orElseThrow(() -> new NotFoundException(REQUESTED_RESOURCE_NOT_FOUND));
     }
 
+    private WorkoutTemplate findWorkoutTemplateById(String workoutTemplateId){
+        LOGGER.info("[WorkoutService] Searching for resource in the database: workoutTemplateId={}", workoutTemplateId);
+        return workoutTemplateRepository.findById(workoutTemplateId).orElseThrow(() -> new NotFoundException(REQUESTED_RESOURCE_NOT_FOUND));
+    }
+
     private void validateIfAuthenticatedUserCanPerformAction(String authorization, Trainee trainee) {
 
         var formattedToken = authorization.replace("Bearer ", "");
@@ -284,26 +301,18 @@ public class WorkoutServiceImpl implements WorkoutService {
         throw new ForbiddenException("Authenticated user can't perform this action");
     }
 
-    private String objectToJsonParser(Object object) {
+    private WorkoutRoutineInstance createWorkoutRoutineInstance(String workoutRoutineSchemaId){
 
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new InternalServerErrorException(e);
-        }
-    }
-
-    private WorkoutRoutineInstance createWorkoutRoutineInstance(WorkoutRoutineInstanceRequestDto workoutRoutineInstanceRequestDto, Trainee trainee){
-        var workoutRoutineSchema = findWorkoutRoutineSchemaById(workoutRoutineInstanceRequestDto.getSchemaId());
+        var workoutRoutineSchema = findWorkoutRoutineSchemaById(workoutRoutineSchemaId);
 
         List<WorkoutInstance> workoutInstances = workoutRoutineSchema.getWorkoutSchemas().stream()
-                .map(workoutSchema -> createWorkoutInstance(workoutSchema, workoutRoutineInstanceRequestDto)).toList();
+                .map(this::createWorkoutInstance).toList();
 
         var workoutRoutineInstance = WorkoutRoutineInstance.builder()
                 .schema(workoutRoutineSchema)
                 .workoutInstances(workoutInstances)
-                .completed(workoutRoutineInstanceRequestDto.getCompleted())
-                .trainee(trainee)
+                .completed(Boolean.FALSE)
+                .trainee(workoutRoutineSchema.getTrainee())
                 .build();
 
         workoutInstances.forEach(workoutInstance -> workoutInstance.setWorkoutRoutineInstance(workoutRoutineInstance));
@@ -311,8 +320,8 @@ public class WorkoutServiceImpl implements WorkoutService {
         return workoutRoutineInstance;
     }
 
-    private WorkoutInstance createWorkoutInstance(WorkoutSchema workoutSchema, WorkoutRoutineInstanceRequestDto workoutRoutineInstanceRequestDto){
-        var sets = createSetsForWorkout(workoutSchema.getId(), workoutRoutineInstanceRequestDto.getWorkoutSets());
+    private WorkoutInstance createWorkoutInstance(WorkoutSchema workoutSchema){
+        var sets = createSetsForWorkout(workoutSchema.getSets());
 
         var workoutInstance = WorkoutInstance.builder()
                 .schema(workoutSchema)
@@ -324,18 +333,22 @@ public class WorkoutServiceImpl implements WorkoutService {
         return workoutInstance;
     }
 
-    private List<Set> createSetsForWorkout(String workoutSchemaId, List<WorkoutSetsRequestDto> workoutSetsRequestDto) {
-        return Optional.ofNullable(workoutSetsRequestDto)
-                .orElse(Collections.emptyList()).stream()
-                .filter(workoutSetRequestDto -> workoutSetRequestDto.getWorkoutId().equals(workoutSchemaId))
-                .flatMap(workoutSetRequestDto -> Optional.ofNullable(workoutSetRequestDto.getSets())
-                        .orElse(Collections.emptyList()).stream()
-                        .map(set -> modelMapper.map(set, Set.class)))
-                .toList();
+    private List<Set> createSetsForWorkout(List<SetSchema> setSchemas) {
+        return setSchemas.stream().map(setSchema -> {
+            return Set.builder()
+                    .reps(setSchema.getReps())
+                    .weight(0.0)
+                    .build();
+        }).toList();
     }
 
+    private WorkoutRoutineInstanceResponseDto toWorkoutRoutineInstanceResponseDto(WorkoutRoutineInstance workoutRoutineInstance){
 
-    private WorkoutRoutineInstanceResponseDto toWorkoutRoutineInstanceResponseDto(WorkoutRoutineInstance workoutRoutineInstance, WorkoutRoutineSchema workoutRoutineSchema, List<WorkoutInstanceResponseDto> workoutInstancesResponse){
+        var workoutRoutineSchema = workoutRoutineInstance.getSchema();
+
+        var workoutInstancesResponse = workoutRoutineInstance.getWorkoutInstances().stream()
+                .map(this::toWorkoutInstanceResponseDto).toList();
+
         return WorkoutRoutineInstanceResponseDto.builder()
                 .id(workoutRoutineInstance.getId())
                 .name(workoutRoutineSchema.getName())
@@ -347,14 +360,14 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     private WorkoutInstanceResponseDto toWorkoutInstanceResponseDto(WorkoutInstance workoutInstance){
 
-        var workoutSchema = workoutInstance.getSchema();
+        var workoutTemplate = workoutInstance.getSchema().getTemplate();
         var sets = toSetResponseDtoList(workoutInstance.getSets());
 
         return WorkoutInstanceResponseDto.builder()
                 .id(workoutInstance.getId())
-                .name(workoutSchema.getName())
-                .description(workoutSchema.getDescription())
-                .equipment(modelMapper.map(workoutSchema.getEquipment(), EquipmentResponseDto.class))
+                .name(workoutTemplate.getName())
+                .description(workoutTemplate.getDescription())
+                .equipment(modelMapper.map(workoutTemplate.getEquipment(), EquipmentResponseDto.class))
                 .sets(sets)
                 .completed(workoutInstance.getCompleted())
                 .build();
@@ -374,5 +387,19 @@ public class WorkoutServiceImpl implements WorkoutService {
                 .reps(set.getReps())
                 .weight(set.getWeight())
                 .build();
+    }
+
+    private void setWorkoutRoutineExecutionPriority(WorkoutRoutineSchemaResponseDto workoutRoutineSchemaResponse, List<WorkoutRoutineSchemaResponseDto> workoutRoutineSchemasResponseList){
+
+        var currentDate = LocalDate.now().getDayOfWeek().name();
+        var workoutExecutionDays = Arrays.asList(workoutRoutineSchemaResponse.getDaysOfWeek().split(","));
+
+        if (workoutExecutionDays.contains(currentDate)){
+            workoutRoutineSchemaResponse.setIsPriority(Boolean.TRUE);
+
+            if (Objects.nonNull(workoutRoutineSchemasResponseList)){
+                Collections.swap(workoutRoutineSchemasResponseList, 0, workoutRoutineSchemasResponseList.indexOf(workoutRoutineSchemaResponse));
+            }
+        }
     }
 }

@@ -20,9 +20,9 @@ public class WorkoutRoutineSchemaRequestDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
-    @JsonProperty("workout_schema_ids")
+    @JsonProperty("workout_schemas")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<String> workoutSchemaIds;
+    private List<WorkoutSchemaRequestDto> workoutSchemas;
 
     @JsonProperty("active")
     @JsonInclude(JsonInclude.Include.NON_NULL)

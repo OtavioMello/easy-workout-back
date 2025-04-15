@@ -1,18 +1,14 @@
 package tcc.project.easy_workout.workout.model.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class WorkoutRoutineInstanceResponseDto {
+public class WorkoutTemplateResponseDto {
 
     @JsonProperty(value = "id", access = JsonProperty.Access.READ_ONLY)
     private String id;
@@ -23,11 +19,10 @@ public class WorkoutRoutineInstanceResponseDto {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty("workouts")
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<WorkoutInstanceResponseDto> workouts;
+    @JsonProperty("tag")
+    private String tag;
 
-    @JsonProperty("completed")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Boolean completed;
+    @JsonProperty("equipment")
+    private EquipmentResponseDto equipment;
+
 }
