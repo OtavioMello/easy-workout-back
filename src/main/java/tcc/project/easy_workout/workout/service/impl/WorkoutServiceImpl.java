@@ -168,7 +168,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     public WorkoutRoutineInstanceResponseDto getWorkoutRoutineInstanceBySchemaId(String workoutRoutineSchemaId, String authorization) {
 
         LOGGER.info("[WorkoutService] Searching for workout routine instance in the database: workoutRoutineSchemaId={}", workoutRoutineSchemaId);
-        var optionalWorkoutRoutineInstance = workoutRoutineInstanceRepository.findBySchemaId(workoutRoutineSchemaId);
+        var optionalWorkoutRoutineInstance = workoutRoutineInstanceRepository.findBySchemaIdAndCompleted(workoutRoutineSchemaId, Boolean.FALSE);
 
         if (optionalWorkoutRoutineInstance.isPresent() && Boolean.FALSE.equals(optionalWorkoutRoutineInstance.get().getCompleted())){
 
