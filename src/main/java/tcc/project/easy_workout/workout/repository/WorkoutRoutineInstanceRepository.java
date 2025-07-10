@@ -14,5 +14,5 @@ public interface WorkoutRoutineInstanceRepository extends JpaRepository<WorkoutR
     @EntityGraph(attributePaths = {"schema", "workoutInstances.schema.template.equipment"})
     List<WorkoutRoutineInstance> findAllByTraineeId(String traineeId);
 
-    Optional<WorkoutRoutineInstance> findBySchemaId(String schemaId);
+    Optional<WorkoutRoutineInstance> findBySchemaIdAndCompleted(String schemaId, Boolean completed);
 }
